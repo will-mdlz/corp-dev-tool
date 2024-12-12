@@ -1,0 +1,88 @@
+/* Main header container */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 20px 225px;
+    width: 100%;
+    box-sizing: border-box;
+    background-color: #838080;
+}
+
+/* Left side of header containing logo and nav */
+.header-left {
+    display: flex;
+    align-items: flex-start;
+    gap: 5rem;
+}
+
+/* Logo container */
+.logo-container {
+    color: white;
+    display: flex;
+    align-items: center;
+}
+
+.logo-container h1 {
+    margin: 0;
+    font-size: 28px;
+    color: white;
+}
+
+/* Navigation */
+nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    gap: 4rem;
+}
+
+.nav-item {
+    font-size: 24px;
+    cursor: pointer;
+    color: white;
+}
+
+.nav-item:hover {
+    color: #FFD700; /* This is a gold color */
+}
+
+/* Dropdown menu */
+.dropdown {
+    position: relative;
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background-color: white;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    padding: 0.5rem 0;
+    min-width: 150px;
+    list-style: none;
+    z-index: 1000;
+    margin-top: 0.5rem;
+}
+
+.dropdown-menu li {
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+}
+
+/* Settings icon */
+.settings-icon {
+    color: rgb(255, 255, 255);
+    cursor: pointer;
+}
+
+.settings-icon:hover {
+    color: #FFD700;
+}
+
+/* Reset default margins */
+body, #root {
+    margin: 0;
+    padding: 0;
+}
