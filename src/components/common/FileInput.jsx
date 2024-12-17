@@ -7,7 +7,7 @@ import { Button, Box, Typography } from '@mui/material';
  */
 const FileInput = ({ onFileSelect, accept = '.xlsx,.xls', className = '', style = {} }) => {
     const [fileName, setFileName] = useState('');
-
+   
     const handleFileUpload = (event) => {
         const file = event.target.files[0];
         if (file) {

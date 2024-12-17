@@ -1,12 +1,17 @@
 /* Main header container */
+:root {
+    --main-font: 'Times New Roman', sans-serif;
+}
+
 .header {
+    --header-height: calc(50px + 26px);
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    padding: 20px 225px;
+    padding: 25px 225px;
     width: 100%;
     box-sizing: border-box;
-    background-color: #838080;
+    background-color: #706969;
 }
 
 /* Left side of header containing logo and nav */
@@ -21,12 +26,22 @@
     color: white;
     display: flex;
     align-items: center;
+    cursor: pointer;
+}
+
+.logo-container:hover {
+    color: #FFD700;
+}
+
+.logo-container:hover h1 {
+    color: #FFD700;
 }
 
 .logo-container h1 {
     margin: 0;
-    font-size: 28px;
+    font-size: 25px;
     color: white;
+    font-family: var(--main-font);
 }
 
 /* Navigation */
@@ -39,13 +54,30 @@ nav ul {
 }
 
 .nav-item {
-    font-size: 24px;
+    font-size: 20px;
     cursor: pointer;
     color: white;
+    font-family: var(--main-font);
+    position: relative;
+    padding-bottom: 5px;
 }
 
-.nav-item:hover {
-    color: #FFD700; /* This is a gold color */
+.nav-item::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 2px;
+    background-color: #FFD700;
+    transition: width 0.2s ease-in-out;
+}
+
+.nav-item:hover::after,
+.nav-item.active::after {
+    color: #FFD700; /* Ensure gold color on hover and when active */
+    width: 24px;
 }
 
 /* Dropdown menu */
@@ -54,21 +86,43 @@ nav ul {
 }
 
 .dropdown-menu {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    background-color: white;
+    position: fixed;
+    top: var(--header-height);
+    left: 50%;
+    transform: translateX(-50%);
+    width: 75%;
+    background-color: rgb(72, 72, 72);
+    border-top: 2px solid #FFD700; /* Added gold border top */
     box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-    padding: 0.5rem 0;
-    min-width: 150px;
+    padding: 1rem 1.5rem; /* Reduced gap to the sides */
+    min-width: 200px;
+    min-height: 60px;
     list-style: none;
     z-index: 1000;
     margin-top: 0.5rem;
+    display: flex;
+    justify-content: space-between;
 }
 
 .dropdown-menu li {
-    padding: 0.5rem 1rem;
+    padding: 0; /* No padding between list items */
     cursor: pointer;
+    color: white;
+    font-family: var(--main-font);
+    flex: 1; /* Evenly distribute the list items */
+    display: flex; /* Use flexbox to center content */
+    justify-content: center; /* Center content horizontally */
+    align-items: center; /* Center content vertically */
+    text-align: center; /* Center the text within each item */
+}
+
+.dropdown-menu li span {
+    padding: 0.5rem 0.25rem; /* Padding between text and its background */
+}
+
+.dropdown-menu li:hover {
+    background-color: rgba(255, 255, 255, 0.1); /* Subtle hover effect */
+    color: #FFD700
 }
 
 /* Settings icon */
