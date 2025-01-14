@@ -11,6 +11,9 @@ import NWC from '../pages/NWC';
 import XCosts from '../pages/1xCosts';
 import AVP from '../pages/AVP';
 import NPVWaterfall from '../pages/Waterfall';
+import db from '../../services/tempdb';
+import { Dvr } from '@mui/icons-material';
+ 
 
 const small = {
     marginLeft: '4rem',
@@ -109,13 +112,13 @@ const Header = () => {
         // Input Tables section
         if (section === 1) {
             switch (index) {
-                case 0: return <FinancialTables type="totalBase" />;
-                case 1: return <FinancialTables type="costSyn" />;
-                case 2: return <FinancialTables type="totalRevSyn" />;
-                case 3: return <FinancialTables type="disSynergies" />;
-                case 4: return <NWC />;
-                case 5: return <FinancialTables type="proFormaPL" />;
-                case 6: return <XCosts />;
+                case 0: return db.metadata['base'] ? <FinancialTables type="totalBase" /> : <ExcelImportPage />;
+                case 1: return db.metadata['cost'] ? <FinancialTables type="costSyn" /> : <ExcelImportPage />;
+                case 2: return db.metadata['rev'] ? <FinancialTables type="totalRevSyn" /> : <ExcelImportPage />;
+                case 3: return db.metadata['dis'] ? <FinancialTables type="disSynergies" /> : <ExcelImportPage />;
+                case 4: return db.metadata['nwc'] ? <NWC /> : <ExcelImportPage />; 
+                case 5: return db.metadata['proforma'] ? <FinancialTables type="proFormaPL" /> : <ExcelImportPage />;
+                case 6: return db.metadata['xcost'] ? <XCosts /> : <ExcelImportPage />;
                 default: return <LandingPage handleGetStarted={handleGetStarted}/>;
             }
         }
@@ -123,7 +126,7 @@ const Header = () => {
         // Settings section
         if (section === 2) {
             switch (index) {
-                case 0: return <ControlPage />;
+                case 0: return db.metadata['control'] ? <ControlPage /> : <ExcelImportPage />;
                 case 1: return <ExcelImportPage />;
                 default: return <LandingPage handleGetStarted={handleGetStarted}/>;
             }

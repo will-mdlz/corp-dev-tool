@@ -7,6 +7,10 @@ const FinancialTables = ({ type }) => {
   // Common years for all tables
   //const years = Array.from({ length: 15 }, (_, i) => (2018 + i));
 
+  // const isDataEmpty = (type) => {
+  //   // Check if metadata exists and if the specific type has data
+  //   return !db.metadata[type];
+  // };
   
   // Metrics for each table type
   const tableConfigs = {

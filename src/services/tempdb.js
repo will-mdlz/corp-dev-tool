@@ -12,7 +12,6 @@ class DataManager {
         this.cost = {};
         this.base = {};
         this.loadData();
-        console.log(this.nwc)
     }
 
     loadData() {
