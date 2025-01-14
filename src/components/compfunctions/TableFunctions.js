@@ -119,11 +119,45 @@ export const convertToGeneral = (input, decimalPlaces = -1) => {
     generalValue = input.toFixed(decimalPlaces);
   }
 
-  const formattedValue = `${parseFloat(generalValue).toLocaleString()}`;
+  const formattedValue = `${parseFloat(generalValue)}`;
 
   if (input < 0) {
     return `(${formattedValue})`;
   }
 
   return `${formattedValue}`;
+}
+
+export const convertToPP = (input, decimalPlaces = -1) => {
+  if (typeof input !== 'number' || isNaN(input)) {
+    throw new Error('Input must be a valid number');
+  }
+
+  if (Math.abs(input) < 1e-5) {
+    return '-';
+  }
+
+  if (!Number.isFinite(input)) {
+    return input < 0 ? `(${INFINITY_SYMBOL})` : `${INFINITY_SYMBOL}`;
+  }
+
+  let generalValue;
+
+  if (decimalPlaces === -1) {
+    if (input < 100) {
+      generalValue = input.toFixed(1);
+    } else {
+      generalValue = input.toFixed(0);
+    }
+  } else {
+    generalValue = input.toFixed(decimalPlaces);
+  }
+
+  const formattedValue = `${parseFloat(generalValue)}`;
+
+  if (input < 0) {
+    return `(${formattedValue})x`;
+  }
+
+  return `${formattedValue}x`;
 }

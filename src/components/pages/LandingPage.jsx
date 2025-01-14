@@ -29,7 +29,7 @@ const Hero = styled.section`
 `;
 
 const HeroContent = styled.div`
-  max-width: 600px;
+  max-width: 800px;
   
   h1 {
     font-size: 3rem;
@@ -161,7 +161,7 @@ const LandingPage = ({ handleGetStarted }) => {
         </Container>
       </Section>
 
-      <Section dark>
+      <Section dark='true'>
         <Container>
           <SectionTitle>Our Features</SectionTitle>
           <Features>

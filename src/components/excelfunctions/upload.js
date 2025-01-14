@@ -1,3 +1,5 @@
+    //import { insertFileData } from '../../services/database';
+import db from '../../services/tempdb';
 const xlsx = require('xlsx');
 
 const process1xCosts = (sheet) => {
@@ -6,9 +8,11 @@ const process1xCosts = (sheet) => {
     const METRIC_COL_1 = 2;     // Column C
     const METRIC_COL_2 = 3;     // Column D
     
+    const category = 'xcost'
+
     const values = [];
     const metadata = {
-        category: '1xCosts',
+        category: category,
         startYear: null,
         totalYears: 0,
         processedAt: new Date().toISOString()
@@ -33,6 +37,9 @@ const process1xCosts = (sheet) => {
     metadata.startYear = years[0];
     metadata.totalYears = years.length;
 
+    const metrics = []
+    const dead_metrics = []
+
     // Process each row after the year row
     for (let rowIndex = YEAR_START_ROW + 1; rowIndex < sheet.length; rowIndex++) {
         const row = sheet[rowIndex];
@@ -42,6 +49,8 @@ const process1xCosts = (sheet) => {
         const metric = row[METRIC_COL_1] || row[METRIC_COL_2];
         if (!metric) continue;  // Skip empty rows
 
+        metrics.push(metric)
+
         // Process each year's data
         years.forEach((year, yearIndex) => {
             const valueIndex = YEAR_START_COL + yearIndex;
@@ -49,26 +58,34 @@ const process1xCosts = (sheet) => {
             
             if (rawValue !== undefined && rawValue !== null) {
                 values.push({
-                    category: '1xCosts',
+                    category: category,
                     metric,
                     year,
                     value: cleanValue(rawValue),
                     isSubMetric: Boolean(row[METRIC_COL_2] && !row[METRIC_COL_1])
                 });
             }
+            else {
+                if(!dead_metrics.includes(metric)) dead_metrics.push(metric)
+            }
         });
     }
 
     metadata.totalMetrics = new Set(values.map(v => v.metric)).size;
 
+    metadata.metrics = metrics;
+
+    metadata.dead_metrics = dead_metrics;
+
     return {
         metadata,
-        values
+        values,
+        category
     };
 };
 
 const processProFormaPL = (sheet) => {
-    return formatSheetData(sheet, 'ProForma');
+    return formatSheetData(sheet, 'proforma');
 };
 
 const processNWC = (sheet) => {
@@ -77,13 +94,15 @@ const processNWC = (sheet) => {
     const METRIC_COL_2 = 2;
     const DATA_START_COL = 5;
     
+    const category = 'nwc';
+
     let currentSection = null;
     let currentSubsection = null;
     const values = [];
     
     // Create metadata object
     const metadata = {
-        category: 'NWC',
+        category: category,
         startYear: null,
         totalYears: 0,
         sections: [],
@@ -143,7 +162,7 @@ const processNWC = (sheet) => {
             
             if (rawValue !== undefined && rawValue !== null) {
                 values.push({
-                    category: 'NWC',
+                    category: category,
                     section: currentSection,
                     subsection: currentSubsection,
                     metric,
@@ -157,24 +176,25 @@ const processNWC = (sheet) => {
 
     return {
         metadata,
-        values
+        values,
+        category
     };
 };
 
 const processDisSynergies = (sheet) => {
-    return formatSheetData(sheet, 'DisSyn');
+    return formatSheetData(sheet, 'dis');
 };
 
 const processTotalRevSyn = (sheet) => {
-    return formatSheetData(sheet, 'RevSyn');
+    return formatSheetData(sheet, 'rev');
 };
 
 const processTotalCostSyn = (sheet) => {
-    return formatSheetData(sheet, 'CostSyn');
+    return formatSheetData(sheet, 'cost');
 };
 
 const processTotalBase = (sheet) => {
-    return formatSheetData(sheet, 'TotalBase');
+    return formatSheetData(sheet, 'base');
 };
 
 const cleanValue = (value) => {
@@ -192,6 +212,7 @@ const formatSheetData = (sheet, category) => {
     const values = [];
     const METRIC_COL_1 = 1;      // Main metrics in column B (index 1)
     const METRIC_COL_2 = 2;      // Subcategories in column C (index 2)
+    const METRIC_COL_3 = 3;
     const DATA_START_COL = 5;     // Data starts at column F (index 5)
     
     // Specific subcategories we want to include
@@ -223,6 +244,12 @@ const formatSheetData = (sheet, category) => {
         metadata.totalYears++;
     }
 
+    let subcat = "";
+    let subsubcat = "";
+
+    let metrics = [];
+    let truemetrics = [];
+
     for (let rowIndex = 6; rowIndex < sheet.length; rowIndex++) {
         const row = sheet[rowIndex];
         
@@ -233,14 +260,26 @@ const formatSheetData = (sheet, category) => {
         if (row[METRIC_COL_1] === "Memo:") continue;
         
         // Check if it's a main metric or a valid subcategory
-        const isValidRow = row[METRIC_COL_1] || 
-                          (row[METRIC_COL_2] && VALID_SUBCATEGORIES.has(row[METRIC_COL_2]));
+        // const isValidRow = row[METRIC_COL_1] || 
+        //                   (row[METRIC_COL_2] && VALID_SUBCATEGORIES.has(row[METRIC_COL_2]));
         
+        const isValidRow = row[METRIC_COL_1] || row[METRIC_COL_2] || (row[METRIC_COL_3] && VALID_SUBCATEGORIES.has(subsubcat))
+
         if (!isValidRow) continue;
         
         // Get metric from either column 1 or 2
-        const metric = row[METRIC_COL_1] || row[METRIC_COL_2];
-        
+        let metric = row[METRIC_COL_1] || row[METRIC_COL_2] || row[METRIC_COL_3];
+
+        metrics.push(metric)
+
+        metric = row[METRIC_COL_3] ? subsubcat + " " + metric : (row[METRIC_COL_2] && !VALID_SUBCATEGORIES.has(row[METRIC_COL_2])) ? subcat + " " + metric : metric
+
+        truemetrics.push(metric)
+
+        if(row[METRIC_COL_1]) subcat = metric;
+
+        if(row[METRIC_COL_2]) subsubcat = metric;
+
         // Process each year's data up to totalYears
         for (let i = 0; i < metadata.totalYears; i++) {
             const yearIndex = DATA_START_COL + i;
@@ -253,7 +292,7 @@ const formatSheetData = (sheet, category) => {
                     metric,
                     year,
                     value: cleanValue(rawValue),
-                    isSubcategory: !row[METRIC_COL_1] && row[METRIC_COL_2]
+                    isSubcategory: row[METRIC_COL_1] ? false : row[METRIC_COL_2] ? subcat : subsubcat,
                 });
             }
         }
@@ -264,9 +303,70 @@ const formatSheetData = (sheet, category) => {
         (_, i) => metadata.startYear + i);
     metadata.sheetDimensions.dataCols = metadata.totalYears;
     
+    metadata.metrics = metrics;
+    metadata.truemetrics = truemetrics;
+
     return {
         metadata,
-        values
+        values,
+        category
+    };
+};
+
+const processControlPanel = (sheet) => {
+    const METRIC_COL = 0;      // Column A
+    const VALUE_COL = 1;       // Column B
+    const START_ROW = 2;       // Start from row 2 (index 1)
+    const END_ROW = 25;        // Stop at row 25
+    
+    const category = 'control';
+
+    const values = [];
+    const metadata = {
+        category: category,
+        processedAt: new Date().toISOString()
+    };
+
+    values.push({
+        category: category,
+        metric: 'Project Name',
+        value: sheet[0][0]
+    })
+
+    // Process each row up to END_ROW
+    for (let rowIndex = START_ROW; rowIndex < Math.min(sheet.length, END_ROW); rowIndex++) {
+        const row = sheet[rowIndex];
+        if (!row || !row[METRIC_COL]) continue;
+
+        const metric = row[METRIC_COL];
+        const rawValue = row[VALUE_COL];
+        
+        if (rawValue !== undefined && rawValue !== null) {
+            values.push({
+                category: category,
+                metric,
+                // First metric (rowIndex === 1) keeps the string value, others are cleaned numbers
+                value: rowIndex === START_ROW ? rawValue : cleanValue(rawValue)
+            });
+        }
+    }
+
+    let displays = []
+
+    for(let i = 1; i < 5; i++) {
+        displays.push([sheet[29][i], sheet[30][i]])
+    }
+    
+    values.push({
+        category: category,
+        metric: 'Displays',
+        value: displays
+    })
+
+    return {
+        metadata,
+        values,
+        category
     };
 };
 
@@ -287,76 +387,69 @@ export const uploadFile = (file) => {
     }
 }
 
-const processFile = (binaryStr) => {
-    const workbook = xlsx.read(binaryStr, { type: 'binary' });
-    const sheetNames = workbook.SheetNames;
-    let unused_sheets = []
-    let allValues = [];
-    let allMetadata = {};
-    const sheetMetrics = new Set();
-    const nwcMetrics = new Set();
-    const costsMetrics = new Set();
+const processFile = async (binaryStr) => {
+    try {
+        const workbook = xlsx.read(binaryStr, { type: 'binary' });
+        const sheetNames = workbook.SheetNames;
+        let unused_sheets = [];
+        let allValues = [];
+        let allMetadata = {};
 
-    sheetNames.forEach(sheetName => {
-        const worksheet = workbook.Sheets[sheetName];
-        const sheet = xlsx.utils.sheet_to_json(worksheet, { header: 1 });
-        
-        let processedData;
-        switch (sheetName) {
-            case '1xCosts (USD)':
-                processedData = process1xCosts(sheet);
-                collectMetrics(processedData, costsMetrics);
-                break;
-            case 'ProFormaPL (USD)':
-                processedData = processProFormaPL(sheet);
-                collectMetrics(processedData, sheetMetrics);
-                break;
-            case 'NWC (USD)':
-                processedData = processNWC(sheet);
-                collectMetrics(processedData, nwcMetrics);
-                break;
-            case 'Dis-Synergies (USD)':
-                processedData = processDisSynergies(sheet);
-                collectMetrics(processedData, sheetMetrics);
-                break;
-            case 'Total Rev Syn (USD)':
-                processedData = processTotalRevSyn(sheet);
-                collectMetrics(processedData, sheetMetrics);
-                break;
-            case 'Total Cost Syn (USD)':
-                processedData = processTotalCostSyn(sheet);
-                collectMetrics(processedData, sheetMetrics);
-                break;
-            case 'Total Base (USD)':
-                processedData = processTotalBase(sheet);
-                collectMetrics(processedData, sheetMetrics);
-                break;
-            default:
-                unused_sheets.push(sheetName);
-        }
-        
-        if (processedData) {
-            allValues = [...allValues, ...processedData.values];
-            allMetadata[sheetName] = processedData.metadata;
-        }
-    });
+        sheetNames.forEach(sheetName => {
+            const worksheet = workbook.Sheets[sheetName];
+            const sheet = xlsx.utils.sheet_to_json(worksheet, { header: 1 });
+            
+            let processedData;
+            switch (sheetName) {
+                case 'Control Panel and Data Tables':
+                    processedData = processControlPanel(sheet);
+                    break;
+                case '1xCosts (USD)':
+                    processedData = process1xCosts(sheet);
+                    break;
+                case 'ProFormaPL (USD)':
+                    processedData = processProFormaPL(sheet);
+                    break;
+                case 'NWC (USD)':
+                    processedData = processNWC(sheet);
+                    break;
+                case 'Dis-Synergies (USD)':
+                    processedData = processDisSynergies(sheet);
+                    break;
+                case 'Total Rev Syn (USD)':
+                    processedData = processTotalRevSyn(sheet);
+                    break;
+                case 'Total Cost Syn (USD)':
+                    processedData = processTotalCostSyn(sheet);
+                    break;
+                case 'Total Base (USD)':
+                    processedData = processTotalBase(sheet);
+                    break;
+                default:
+                    unused_sheets.push(sheetName);
+            }
+            
+            if (processedData) {
+                allValues = [...allValues, ...processedData.values];
+                allMetadata[processedData.category] = processedData.metadata;
+            }
+        });
 
-    console.log('Sheet Metadata:', allMetadata);
-    console.log('All Sheet metrics:', Array.from(sheetMetrics));
-    console.log('All NWC metrics:', Array.from(nwcMetrics));
-    console.log('All Cost Metrics:', Array.from(costsMetrics));
-    
-    return {
-        values: allValues,
-        metadata: allMetadata
-    };
-};
+        const result = {
+            values: allValues,
+            metadata: allMetadata
+        };
 
-// Helper function to collect metrics from a sheet
-const collectMetrics = (processedData, metricsSet) => {
-    Object.keys(processedData.values).forEach((key) => {
-        const metric = processedData.values[key]["metric"];
-        metricsSet.add(metric);
-    })
+        //console.log(result)
+        db.setData(result);
+
+        // const dbResult = await insertFileData(result);
+        // console.log('Database insertion results:', dbResult);
+        // return result;
+    } catch (error) {
+        console.error('Error processing file:', error);
+        // You might want to show this error to the user
+        throw error;
+    }
 };
 

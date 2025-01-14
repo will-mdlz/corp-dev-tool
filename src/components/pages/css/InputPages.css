@@ -1,0 +1,23 @@
+.title-header {
+    background-color: #f5f5f5;
+    padding: 1rem;
+    text-align: center;
+    border-radius: 4px;
+    opacity: .85;
+}
+
+.years-container {
+    color: white !important;
+    background-color: #4F2170;
+    text-decoration: underline;
+}
+
+.separator-header {
+    border: none !important;
+}
+
+.separator-container {
+    background-color: transparent !important; /* Ensure it's transparent */
+    border: none; /* Remove borders if present */
+    
+}

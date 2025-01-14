@@ -3,18 +3,77 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import CorporateFareIcon from '@mui/icons-material/CorporateFare';
 import './Header.css';
 import LandingPage from '../pages/LandingPage';
-import TotalBasePage from '../pages/TotalBasePage';
 import ExcelImportPage from '../pages/ExcelImportPage';
 import ControlPage from '../pages/ControlPage';
+import FinancialTables from '../pages/FinancialTables';
+import FinancialDisplay from '../pages/FinancialDisplay';
+import NWC from '../pages/NWC';
+import XCosts from '../pages/1xCosts';
+import AVP from '../pages/AVP';
+import NPVWaterfall from '../pages/Waterfall';
 
+const small = {
+    marginLeft: '4rem',
+    marginRight: '3rem',
+    spaceBetween: '3rem',
+}
+
+const medium = {
+    marginLeft: '7rem',
+    marginRight: '5rem',
+    spaceBetween: '4.5rem',
+}
+
+const large = {
+    marginLeft: '10rem',
+    marginRight: '8rem',
+    spaceBetween: '7rem',
+}
 
 const Header = () => {
     const [activeDropdown, setActiveDropdown] = useState(null);
     const [displayContent, setDisplayContent] = useState([]); // State variable to control displayed content
+    const [dropdownTop, setDropdownTop] = useState(0);
 
-    const data_items = ["AVP", "Leverage Profile", "Cash Flow", "P&L", "NPV Waterfall"];
+    const data_items = ["AVP", "Leverage Profile", "Cash Flow", "Consolidated P&L", "Standalone P&L", "NPV Waterfall"];
     const input_items = ["Total Base", "Total Cost Syn", "Total Rev Syn", "Dis-Syn", "NWC", "ProFormaPL", "1xCosts"];
     const settings_items = ["Control Panel", "Import Data"]
+
+    const [size, setSize] = useState(small)
+
+    useEffect(() => {
+    const calculateSize = () => {
+        const ws = window.innerWidth;
+        const newSize = ws < 1250 ? small : ws < 1800 ? medium : large
+        setSize(newSize);
+    }
+    
+    calculateSize();
+
+    window.addEventListener("resize", calculateSize);
+
+    // Cleanup event listener on component unmount
+    return () => window.removeEventListener("resize", calculateSize);
+    }, [])
+
+    useEffect(() => {
+        // Update header height dynamically
+        const updateDropdownPosition = () => {
+            setActiveDropdown(false)
+        };
+
+        // Set initial header height
+        updateDropdownPosition();
+
+        // Listen for window resize and scroll
+        window.addEventListener('scroll', updateDropdownPosition);
+        window.addEventListener('resize', updateDropdownPosition);
+
+        return () => {
+            window.removeEventListener('scroll', updateDropdownPosition);
+            window.removeEventListener('resize', updateDropdownPosition);
+        };
+    }, []);
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -28,7 +87,6 @@ const Header = () => {
     }, []);
 
     const handleGetStarted = () => {
-
         setDisplayContent([2, 1])
     }
 
@@ -38,11 +96,12 @@ const Header = () => {
         // Data Tables section
         if (section === 0) {
             switch (index) {
-                // case 0: return <AVPPage />;
-                // case 1: return <LeverageProfilePage />;
-                // case 2: return <CashFlowPage />;
-                // case 3: return <PLPage />;
-                // case 4: return <NPVWaterfallPage />;
+                case 0: return <AVP/>;
+                case 1: return <FinancialDisplay type="leverageProfile" />;
+                case 2: return <FinancialDisplay type='cashflow' />;
+                case 3: return <FinancialDisplay type='consolidatedpnl' />;
+                case 4: return <FinancialDisplay type='standalonepnl' />;
+                case 5: return <NPVWaterfall />;
                 default: return <LandingPage handleGetStarted={handleGetStarted}/>;
             }
         }
@@ -50,13 +109,13 @@ const Header = () => {
         // Input Tables section
         if (section === 1) {
             switch (index) {
-                case 0: return <TotalBasePage />;
-                // case 1: return <TotalCostSynPage />;
-                // case 2: return <TotalRevSynPage />;
-                // case 3: return <DisSynPage />;
-                // case 4: return <NWCPage />;
-                // case 5: return <ProFormaPLPage />;
-                // case 6: return <OnexCostsPage />;
+                case 0: return <FinancialTables type="totalBase" />;
+                case 1: return <FinancialTables type="costSyn" />;
+                case 2: return <FinancialTables type="totalRevSyn" />;
+                case 3: return <FinancialTables type="disSynergies" />;
+                case 4: return <NWC />;
+                case 5: return <FinancialTables type="proFormaPL" />;
+                case 6: return <XCosts />;
                 default: return <LandingPage handleGetStarted={handleGetStarted}/>;
             }
         }
@@ -81,24 +140,27 @@ const Header = () => {
     const handleClick = (menu, event) => {
         event.stopPropagation();
         setActiveDropdown(activeDropdown === menu ? null : menu);
+        const header = document.querySelector('.header');
+        const rect = header?.getBoundingClientRect();
+        setDropdownTop(rect?.bottom - 8 || 0);
     };
 
     return (
-        <>
+        <div>
         <header className="header">
-            <div className="header-left">
-                <div className="logo-container" onClick={() => handleContentChange(-1, -1)}>
+            <div className="header-left" style={{marginLeft: size.marginLeft}}>
+                <div className="logo-container"  onClick={() => handleContentChange(-1, -1)}>
                     <CorporateFareIcon sx={{ fontSize: 24, marginRight: '8px' }} />
                     <h1>MDLZ M&A</h1>
                 </div>
                 <nav>
                     <ul>
                         <li className="dropdown">
-                            <span onClick={(e) => handleClick('output', e)} className={`nav-item ${activeDropdown === 'output' ? 'active' : ''}`}>
+                            <span onClick={(e) => handleClick('output', e)} className={`nav-item ${activeDropdown === 'output' ? 'active' : ''}`} style={{marginLeft: size.spaceBetween}}>
                                 Data Tables
                             </span>
                             {activeDropdown === 'output' && (
-                                <ul className="dropdown-menu">
+                                <ul className="dropdown-menu" style={{ top: `${dropdownTop}px` }}>
                                     {data_items.map((item, index) => {
                                         return (
                                             <li 
@@ -113,11 +175,11 @@ const Header = () => {
                             )}
                         </li>
                         <li className="dropdown">
-                            <span onClick={(e) => handleClick('input', e)} className={`nav-item ${activeDropdown === 'input' ? 'active' : ''}`}>
+                            <span onClick={(e) => handleClick('input', e)} className={`nav-item ${activeDropdown === 'input' ? 'active' : ''}`} style={{marginLeft: size.spaceBetween}}>
                                 Input Tables
                             </span>
                             {activeDropdown === 'input' && (
-                                <ul className="dropdown-menu">
+                                <ul className="dropdown-menu" style={{ top: `${dropdownTop}px` }}>
                                     {input_items.map((item, index) => {
                                         return (
                                             <li 
@@ -136,9 +198,9 @@ const Header = () => {
             </div>
             <div className="header-right">
                 <div className="dropdown">
-                    <SettingsIcon onClick={(e) => handleClick('settings', e)} className="settings-icon" sx={{ fontSize: '30px'}} />
+                    <SettingsIcon onClick={(e) => handleClick('settings', e)} className="settings-icon" style={{ marginRight: size.marginRight }} sx={{ fontSize: '30px'}} />
                     {activeDropdown === 'settings' && (
-                        <ul className="dropdown-menu">
+                        <ul className="dropdown-menu" style={{ top: `${dropdownTop}px` }}>
                             {settings_items.map((item, index) => {
                                 return (
                                     <li 
@@ -155,7 +217,7 @@ const Header = () => {
             </div>
         </header>
         {renderContent()}
-        </>
+        </div>
     );
 };
 

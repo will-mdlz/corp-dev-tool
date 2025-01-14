@@ -1,6 +1,7 @@
 /* Main header container */
 :root {
     --main-font: 'Times New Roman', sans-serif;
+    --color_1: #E18719;
 }
 
 .header {
@@ -8,17 +9,19 @@
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    padding: 25px 225px;
+    /* padding: 25px 225px; */
+    padding: 25px 0px;
     width: 100%;
     box-sizing: border-box;
-    background-color: #706969;
+    /* background-color: #706969; */
+    background-color: #4F2170;
 }
 
 /* Left side of header containing logo and nav */
 .header-left {
     display: flex;
     align-items: flex-start;
-    gap: 5rem;
+    /* gap: 5rem; */
 }
 
 /* Logo container */
@@ -30,11 +33,11 @@
 }
 
 .logo-container:hover {
-    color: #FFD700;
+    color: var(--color_1);
 }
 
 .logo-container:hover h1 {
-    color: #FFD700;
+    color: var(--color_1);
 }
 
 .logo-container h1 {
@@ -50,7 +53,7 @@ nav ul {
     padding: 0;
     margin: 0;
     display: flex;
-    gap: 4rem;
+    /* gap: 4rem; */
 }
 
 .nav-item {
@@ -70,13 +73,13 @@ nav ul {
     transform: translateX(-50%);
     width: 0;
     height: 2px;
-    background-color: #FFD700;
+    background-color: var(--color_1);
     transition: width 0.2s ease-in-out;
 }
 
 .nav-item:hover::after,
 .nav-item.active::after {
-    color: #FFD700; /* Ensure gold color on hover and when active */
+    color: var(--color_1); /* Ensure gold color on hover and when active */
     width: 24px;
 }
 
@@ -91,10 +94,10 @@ nav ul {
     left: 50%;
     transform: translateX(-50%);
     width: 75%;
-    background-color: rgb(72, 72, 72);
-    border-top: 2px solid #FFD700; /* Added gold border top */
+    background-color: #4F2170;
+    border-top: 2px solid var(--color_1);
     box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-    padding: 1rem 1.5rem; /* Reduced gap to the sides */
+    padding: 1rem 1.5rem;
     min-width: 200px;
     min-height: 60px;
     list-style: none;
@@ -121,8 +124,7 @@ nav ul {
 }
 
 .dropdown-menu li:hover {
-    background-color: rgba(255, 255, 255, 0.1); /* Subtle hover effect */
-    color: #FFD700
+    background-color: #724D8D; /* Subtle hover effect */
 }
 
 /* Settings icon */
@@ -132,7 +134,7 @@ nav ul {
 }
 
 .settings-icon:hover {
-    color: #FFD700;
+    color: var(--color_1);
 }
 
 /* Reset default margins */
